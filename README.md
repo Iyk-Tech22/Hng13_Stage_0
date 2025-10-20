@@ -1,4 +1,4 @@
-# Profile API
+# Profile API.
 
 ## Overview
 The Profile API is an ASP.NET Core Web API controller that provides user profile information along with an interesting cat fact from an external API.
