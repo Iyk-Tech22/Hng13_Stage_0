@@ -4,7 +4,7 @@
     {
         public string Status { get; set; }
         public UserModel User { get; set; }
-        public DateTime TimeStamp { get; set; }
+        public DateTime Timestamp { get; set; }
         public string Fact { get; set; }
     }
 }

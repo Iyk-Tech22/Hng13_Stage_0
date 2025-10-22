@@ -51,7 +51,7 @@ namespace Stage_0_Task.Controllers
                 Name = "Ikechukwu F. Godwin",
                 Stack = "C#/ASP.NET Web API"
             };
-            _apiResponse.TimeStamp = DateTime.UtcNow;
+            _apiResponse.Timestamp = DateTime.UtcNow;
             _apiResponse.Fact = catFact;
             return Ok(_apiResponse);
         }

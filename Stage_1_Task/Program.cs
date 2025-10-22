@@ -1,17 +1,16 @@
-using Stage_0_Task.Middlewares;
+using Stage_1_Task.Middlewares;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers().AddNewtonsoftJson();
-builder.Services.AddSwaggerGen();
-builder.Services.AddRateLimiter(rateLimiterOptions =>
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();;
+builder.Services.AddRateLimiter(rateLimitOptions =>
 {
-    rateLimiterOptions.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
-        httpContext =>
-            RateLimitPartition.GetFixedWindowLimiter(
+    rateLimitOptions.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
                 partitionKey: httpContext.User.Identity.Name ?? httpContext.Request.Headers.Host.ToString(),
                 factory: partition => new FixedWindowRateLimiterOptions
                 {
@@ -19,36 +18,26 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
                     PermitLimit = 100,
                     Window = TimeSpan.FromMinutes(1)
                 }
-            )
+         )
     );
 
-    rateLimiterOptions.OnRejected = async (context, token) =>
+    rateLimitOptions.OnRejected = async (context, token) =>
     {
         context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
         await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
     };
 });
-builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-app.Use(async (context, next) =>
-{
-    if(context.Request.Path == "/")
-    {
-        context.Response.Redirect("/swagger/index.html");
-    }
-    await next();
-});
+app.UseHttpsRedirection();
 
 app.UseSwagger();
 
 app.UseSwaggerUI();
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
